@@ -8,9 +8,18 @@ public abstract class Persona implements IPersona {
     private int dni;
     private int telefono;
     private String email;
+    private String contraseña;
 
     //constructor
 
+    public Persona(String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.dni = dni;
+        this.telefono = telefono;
+        this.email = email;
+        this.contraseña = contraseña;
+    }
 
 
     //setters y getters

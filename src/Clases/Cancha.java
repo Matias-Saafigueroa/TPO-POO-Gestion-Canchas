@@ -4,11 +4,13 @@ public class Cancha {
     private int idCancha;
     private TipoCancha tipoCancha;
     private String superficie;
+    private String Nombre;
 
-    public Cancha(int idCancha, String superficie, TipoCancha tipoCancha) {
+    public Cancha(int idCancha, TipoCancha tipoCancha, String superficie, String nombre) {
         this.idCancha = idCancha;
-        this.superficie = superficie;
         this.tipoCancha = tipoCancha;
+        this.superficie = superficie;
+        Nombre = nombre;
     }
 
     public int getIdCancha() {
@@ -19,6 +21,14 @@ public class Cancha {
         this.idCancha = idCancha;
     }
 
+    public TipoCancha getTipoCancha() {
+        return tipoCancha;
+    }
+
+    public void setTipoCancha(TipoCancha tipoCancha) {
+        this.tipoCancha = tipoCancha;
+    }
+
     public String getSuperficie() {
         return superficie;
     }
@@ -27,12 +37,12 @@ public class Cancha {
         this.superficie = superficie;
     }
 
-    public TipoCancha getTipoCancha() {
-        return tipoCancha;
+    public String getNombre() {
+        return Nombre;
     }
 
-    public void setTipoCancha(TipoCancha tipoCancha) {
-        this.tipoCancha = tipoCancha;
+    public void setNombre(String nombre) {
+        Nombre = nombre;
     }
 
     @Override

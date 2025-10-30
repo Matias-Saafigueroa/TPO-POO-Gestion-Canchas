@@ -50,4 +50,7 @@ public class PagoTarjeta extends Pago{
                 ", entidadBancaria='" + entidadBancaria + '\'' +
                 '}';
     }
+    public double aplicarComision(){
+
+    }
 }

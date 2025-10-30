@@ -3,12 +3,21 @@ package Clases;
 import interfaces.ICliente;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Cliente extends Persona implements ICliente {
     private int idCliente;
     private List<Reserva> historialReservasCliente= new ArrayList<>();//
 
-    //constructor
+    public Cliente(String nombre, String apellido, int dni, int telefono, String email, String contraseña, int idCliente, List<Reserva> historialReservasCliente) {
+        super(nombre, apellido, dni, telefono, email, contraseña);
+        this.idCliente = idCliente;
+        this.historialReservasCliente = historialReservasCliente;
+    }
+
+//constructor
+
+
 
     //setters y getters
 
@@ -52,6 +61,11 @@ public class Cliente extends Persona implements ICliente {
     public void cancelarPago() {
         //implementar
 
+    }
+
+    @Override
+    public List<Reserva> historialReservaCliente(int id) {
+        return List.of();
     }
 
     @Override
