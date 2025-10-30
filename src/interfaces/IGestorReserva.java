@@ -8,6 +8,6 @@ public interface IGestorReserva {
     public boolean cancelarReserva(int id);
     public boolean validarReserva(int id);
     public Reserva mostrarReserva(int id);//revisar esto
-    public void historialReservas();//revisar esto
+    public static void historialReservas();//revisar esto
 
 }

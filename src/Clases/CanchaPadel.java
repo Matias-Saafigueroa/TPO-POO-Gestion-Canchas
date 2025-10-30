@@ -1,26 +1,26 @@
 package Clases;
 
 public class CanchaPadel extends Cancha{
-    private boolean esTechada;
+    private boolean tipoPared;
 
-    public CanchaPadel(int idCancha, String superficie, TipoCancha tipoCancha, boolean esTechada) {
-        super(idCancha, superficie, tipoCancha.PADEL);
-        this.esTechada = esTechada;
+
+    public CanchaPadel(int idCancha, TipoCancha tipoCancha, String superficie, String nombre, boolean tipoPared) {
+        super(idCancha, tipoCancha, superficie, nombre);
+        this.tipoPared = tipoPared;
     }
 
-    public boolean isEsTechada() {
-        return esTechada;
+    public boolean isTipoPared() {
+        return tipoPared;
     }
 
-    public void setEsTechada(boolean esTechada) {
-        this.esTechada = esTechada;
+    public void setTipoPared(boolean tipoPared) {
+        this.tipoPared = tipoPared;
     }
 
     @Override
     public String toString() {
-        return "Cancha de Padel{" +
-                "ID=" + super.getIdCancha() +
-                "Es techada? " + esTechada +
+        return "CanchaPadel{" +
+                "tipoPared=" + tipoPared +
                 '}';
     }
 }

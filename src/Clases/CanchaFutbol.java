@@ -3,8 +3,8 @@ package Clases;
 public class CanchaFutbol extends Cancha{
     private int cantidadJugadores;
 
-    public CanchaFutbol(int idCancha, String superficie, TipoCancha tipoCancha, int cantidadJugadores) {
-        super(idCancha, superficie, tipoCancha.FUTBOL);
+    public CanchaFutbol(int idCancha, TipoCancha tipoCancha, String superficie, String nombre, int cantidadJugadores) {
+        super(idCancha, tipoCancha, superficie, nombre);
         this.cantidadJugadores = cantidadJugadores;
     }
 

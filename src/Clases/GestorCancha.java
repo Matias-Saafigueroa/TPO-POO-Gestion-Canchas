@@ -7,7 +7,7 @@ import java.util.*;
 
 public class GestorCancha implements IGestorCancha {
 
-    private Map<Integer, Cancha> canchas;
+    private static Map<Integer, Cancha> canchas;
 
     public GestorCancha() {
         this.canchas = new HashMap<>();
@@ -18,7 +18,7 @@ public class GestorCancha implements IGestorCancha {
     }
 
     @Override
-    public Cancha agregarCancha(Cancha cancha) {
+    public static Cancha agregarCancha(Cancha cancha) {
         if (cancha == null) {
             throw new IllegalArgumentException("La cancha no puede ser nula.");
         }
@@ -42,19 +42,20 @@ public class GestorCancha implements IGestorCancha {
 
 
     @Override
-    public List<Cancha> obtenerCanchas() {
+    public static List<Cancha> obtenerCanchas() {
         return new ArrayList<>(this.canchas.values());
     }
 
-    public void mostrarCanchas() {
+    public static List<Cancha> mostrarCanchas() {
         if (canchas.isEmpty()) {
             System.out.println(" No hay canchas registradas.");
-            return;
+            return null;
         }
 
         System.out.println(" Lista de canchas:");
         for (Cancha c : canchas.values()) {
             System.out.println("- ID: " + c.getIdCancha() + " | Nombre: " + c.getNombre() + " | Tipo: " + c.getTipoCancha());
         }
+        return null;
     }
 }

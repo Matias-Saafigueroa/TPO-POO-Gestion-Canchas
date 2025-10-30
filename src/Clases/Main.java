@@ -13,68 +13,151 @@ public class Main {
     public static void main(String[] args) {
         int opcion;
         do {
-            mostrarMenu();
             System.out.print("Seleccione una opción: ");
+                System.out.println("========= MENÚ DE GESTIÓN DE CANCHAS =========");
+                System.out.println("1. ---Registrar Cliente-----");
+                System.out.println("2. ---Registrar Cancha------");
+                System.out.println("3. ---Registrar Reserva-----");
+                System.out.println("4. -----Listar Canchas------");
+                System.out.println("5. -----Listar Reservas-----");
+                System.out.println("6. ----------Salir----------");
+                System.out.println("=============================================");
             opcion = leerEntero();
 
+
             switch (opcion) {
-                case 1 -> registrarCliente();
-                case 2 -> registrarCancha();
-                case 3 -> registrarReserva();
-                case 4 -> listarCanchas();
-                case 5 -> listarReservas();
-                case 6 -> System.out.println(" Saliendo del sistema...");
+                case 1 -> {
+                    System.out.print("Ingrese nombre del cliente: ");
+                    String nombre = sc.nextLine();
+                    System.out.print("Ingrese DNI: ");
+                    String dni = sc.nextLine();
+                    System.out.print("Ingrese teléfono: ");
+                    String telefono = sc.nextLine();
+                    Cliente cliente = new Cliente(nombre, dni, telefono);
+                    GestorRegistro.registrarCliente(cliente);
+                    System.out.println("✅ Cliente registrado correctamente.");
+
+                }
+                case 2 -> {
+                    System.out.println("Seleccione tipo de cancha:");
+                    System.out.println("1.⚽ Fútbol");
+                    System.out.println("2.\uD83C\uDFBE Pádel");
+                    System.out.println("3.\uD83E\uDD4E Tenis");
+                    int tipo = sc.nextInt();
+
+                    Cancha cancha;
+                    switch (tipo) {
+                        case 1 -> {
+                            while (true) {
+                                System.out.print("Ingrese el nombre de la cancha: ");
+                                String nombreC = sc.nextLine();
+                                boolean nombreEsValido = GestorCancha.validarDatos(nombreC);
+                                if (nombreEsValido) {
+                                    int id = GestorCancha.asignarId();
+                                    System.out.print("Ingrese la superficie: ");
+                                    String superficie = sc.nextLine();
+                                    TipoCancha tipoCancha = TipoCancha.FUTBOL;
+                                    System.out.print("Ingrese la cantidad de jugadores: ");
+                                    int cantidadJugadores = sc.nextInt();
+                                    sc.nextLine();
+                                    Cancha cancha = new CanchaFutbol(id, tipoCancha, superficie, nombreC, cantidadJugadores);
+                                    System.out.println("Cancha '" + nombreC + "' creada con éxito.");
+                                    GestorCancha.agregarCancha(cancha);
+                                    break;
+                                } else {
+                                    System.out.println("El nombre de la cancha '" + nombreC + "' ya existe. Intente con otro.");
+                                }
+                            }
+                        }
+
+
+                        case 2 -> {
+                            while (true) {
+                                System.out.print("Ingrese el nombre de la cancha de pádel: ");
+                                String nombreC = sc.nextLine();
+
+                                boolean nombreEsValido = GestorCancha.validarDatos(nombreC);
+
+                                if (nombreEsValido) {
+                                    int id = GestorCancha.asignarId();
+
+                                    System.out.print("Ingrese la superficie (ej: Césped sintético): ");
+                                    String superficie = sc.nextLine();
+
+                                    // Atributo específico para una cancha de pádel
+                                    System.out.print("Ingrese el tipo de pared (ej: Blindex, Cemento): ");
+                                    String tipoDePared = sc.nextLine();
+
+                                    // Asignamos el tipo de cancha correspondiente
+                                    TipoCancha tipoCancha = TipoCancha.PADEL;
+
+                                    // Creamos una instancia de CanchaPadel
+                                    // Nota: El constructor puede variar según tu diseño
+                                    Cancha cancha2 = new CanchaPadel(id, tipoCancha, superficie, nombreC, tipoDePared);
+
+                                    System.out.println("Cancha de pádel '" + nombreC + "' creada con éxito.");
+
+                                    break;
+
+                                } else {
+                                    System.out.println("El nombre de la cancha '" + nombreC + "' ya existe. Intente con otro.");
+                                }
+                            }
+                        }
+                        }
+                        case 3 ->{ while (true) {
+                        System.out.print("Ingrese el nombre de la cancha de tenis: ");
+                        String nombreC = sc.nextLine();
+
+                        boolean nombreEsValido = GestorCancha.validarDatos(nombreC);
+
+                        if (nombreEsValido) {
+                            int id = GestorCancha.asignarId();
+
+                            System.out.print("Ingrese la superficie (ej: Polvo de ladrillo, Cemento): ");
+                            String superficie = sc.nextLine();
+                            System.out.print("¿La cancha es para dobles? (true/false): ");
+                            boolean esDoble = sc.nextBoolean();
+                            sc.nextLine(); // Limpiamos el buffer
+
+                            // Asignamos el tipo de cancha correspondiente
+                            TipoCancha tipoCancha = TipoCancha.TENIS;
+
+                            // Creamos la instancia de CanchaTenis usando tu constructor (con el nombre agregado)
+                            Cancha cancha = new CanchaTenis(id, nombreC, superficie, tipoCancha, esDoble);
+
+                            System.out.println("Cancha de tenis '" + nombreC + "' creada con éxito.");
+
+                            break;
+
+                        } else {
+                            System.out.println("El nombre de la cancha '" + nombreC + "' ya existe. Intente con otro.");
+                        }
+                    }
+                    }
+
+                }
+                case 3 -> {
+                    System.out.print("Canchas Disponibles: ");
+                    List<Cancha> canchas = GestorCancha.mostrarCanchas();
+                    System.out.println("ingresa el ID de la cancha que desees alquilar");
+                    //hay que validar que esa cancha no este ocupada
+                }
+
+                case 4 ->GestorCancha.mostrarCanchas();
+                case 5 -> GestorReserva.historialReservas();
+                case 6 -> {break;}
                 default -> System.out.println("❌ Opción inválida.");
             }
             System.out.println();
         } while (opcion != 6);
     }
 
-    private static void mostrarMenu() {
-        System.out.println("========= MENÚ DE GESTIÓN DE CANCHAS =========");
-        System.out.println("1. ---Registrar Cliente-----");
-        System.out.println("2. ---Registrar Cancha------");
-        System.out.println("3. ---Registrar Reserva-----");
-        System.out.println("4. -----Listar Canchas------");
-        System.out.println("5. -----Listar Reservas-----");
-        System.out.println("6. ----------Salir----------");
-        System.out.println("=============================================");
-    }
 
-    private static void registrarCliente() {
-        System.out.print("Ingrese nombre del cliente: ");
-        String nombre = sc.nextLine();
-        System.out.print("Ingrese DNI: ");
-        String dni = sc.nextLine();
-        System.out.print("Ingrese teléfono: ");
-        String telefono = sc.nextLine();
 
-        Cliente cliente = new Cliente(nombre, dni, telefono);
-        clientes.add(cliente);
 
-        System.out.println("✅ Cliente registrado correctamente.");
-    }
 
-    private static void registrarCancha() {
-        System.out.print("Ingrese nombre de la cancha: ");
-        String nombre = sc.nextLine();
 
-        System.out.println("Seleccione tipo de cancha:");
-        System.out.println("1.⚽ Fútbol");
-        System.out.println("2.\uD83C\uDFBE Pádel");
-        System.out.println("3.\uD83E\uDD4E Tenis");
-        int tipo = leerEntero();
-
-        Cancha cancha;
-        switch (tipo) {
-            case 1 -> cancha = new CanchaFutbol(nombre);
-            case 2 -> cancha = new CanchaPadel(nombre);
-            case 3 -> cancha = new CanchaTenis(nombre);
-            default -> {
-                System.out.println("Tipo inválido, se crea como Cancha genérica.");
-                cancha = new Cancha(nombre, TipoCancha.FUTBOL); // valor por defecto
-            }
-        }
 
         gestorCancha.agregarCancha(cancha);
         System.out.println("✅ Cancha registrada correctamente.");

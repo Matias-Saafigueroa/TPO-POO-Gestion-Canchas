@@ -103,7 +103,7 @@ public class GestorReserva implements IGestorReserva {
     }
 
     @Override
-    public void historialReservas() {
+    public static void historialReservas() {
 
     }
 }
