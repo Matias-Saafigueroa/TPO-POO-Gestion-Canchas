@@ -20,6 +20,9 @@ public class Main {
                 System.out.println("3. ---Registrar Reserva-----");
                 System.out.println("4. -----Listar Canchas------");
                 System.out.println("5. -----Listar Reservas-----");
+                System.out.println("6. -----Registrar Administrador-----");
+                System.out.println("7. -----Cancelar Reserva-----");
+                System.out.println("8. -----Realizar Pago-----");
                 System.out.println("6. ----------Salir----------");
                 System.out.println("=============================================");
             opcion = leerEntero();
