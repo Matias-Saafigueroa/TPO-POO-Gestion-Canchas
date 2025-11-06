@@ -16,7 +16,6 @@ public class Main {
             System.out.print("Seleccione una opción: ");
                 System.out.println("========= MENÚ DE GESTIÓN DE CANCHAS =========");
                 System.out.println("1. ---Registrar Usuario/Iniciar Sesion-----");
-                System.out.println("2. ---Registrar Cancha------");
                 System.out.println("3. ---Registrar Reserva-----");
                 System.out.println("4. -----Listar Canchas------");
                 System.out.println("5. -----Listar Reservas-----");
@@ -62,6 +61,38 @@ public class Main {
                             System.out.println("Ingrese la contraseña");
                             String contraseña= sc.nextLine().toLowerCase();
                             Persona usuario = gestorUsuarios.iniciarSesion(dni, contraseña);
+                            // 4. Verificas el resultado
+                            if (usuario == null) {
+                                System.out.println("¡DNI o contraseña incorrectos!");
+
+                            } else {
+                                // ¡Éxito! Ahora puedes saber qué tipo de usuario es
+                                if (usuario instanceof Administrador) {
+                                    System.out.println("Bienvenido, Administrador: " + usuario.getNombre());
+                                    System.out.println("elegi cancha a utilizar (Padel,Futbol,Tenis)");
+                                    String eleccionCancha = sc.nextLine().toLowerCase();
+                                    switch (eleccionCancha) {
+                                        case "padel"->{
+                                        System.out.println("1. ---Registrar Cancha------");
+
+                                        System.out.println("2. ---Eliminar Cancha------");
+                                        System.out.println("3. ---Asignar Precio------");
+                                        System.out.println("4. ---Cancelar Reserva------");
+                                        }
+                                        case "futbol"->{
+
+                                        }
+                                        case "tenis"->{
+
+                                        }
+                                    }
+
+
+                                } else if (usuario instanceof Cliente) {
+                                    System.out.println("Bienvenido, Cliente: " + usuario.getNombre());
+                                    // ... mostrar menú de cliente ...
+                                }
+                            }
 
 
                     }
@@ -70,6 +101,7 @@ public class Main {
                     }
                 }
                 case 2 -> {
+                    GestorCancha gestorCancha = new GestorCancha();
                     System.out.println("Seleccione tipo de cancha:");
                     System.out.println("1.⚽ Fútbol");
                     System.out.println("2.\uD83C\uDFBE Pádel");
@@ -82,7 +114,7 @@ public class Main {
                             while (true) {
                                 System.out.print("Ingrese el nombre de la cancha: ");
                                 String nombreC = sc.nextLine();
-                                boolean nombreEsValido = GestorCancha.validarDatos(nombreC);
+                                boolean nombreEsValido = gestorCancha.validarDatos(nombreC);
                                 if (nombreEsValido) {
                                     int id = GestorCancha.asignarId();
                                     System.out.print("Ingrese la superficie: ");
@@ -140,10 +172,10 @@ public class Main {
                         System.out.print("Ingrese el nombre de la cancha de tenis: ");
                         String nombreC = sc.nextLine();
 
-                        boolean nombreEsValido = GestorCancha.validarDatos(nombreC);
+                        boolean nombreEsValido = gestorCancha.validarDatos(nombreC);
 
                         if (nombreEsValido) {
-                            int id = GestorCancha.asignarId();
+                            int id = gestorCancha.asignarId();
 
                             System.out.print("Ingrese la superficie (ej: Polvo de ladrillo, Cemento): ");
                             String superficie = sc.nextLine();
@@ -262,4 +294,5 @@ public class Main {
             }
         }
     }
+
 }
