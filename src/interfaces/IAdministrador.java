@@ -1,5 +1,6 @@
 package interfaces;
 
+import Clases.Cancha;
 import Clases.Persona;
 
 public interface IAdministrador {

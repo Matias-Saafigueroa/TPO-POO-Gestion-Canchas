@@ -65,6 +65,14 @@ public abstract class Persona implements IPersona {
         this.email = email;
     }
 
+    public String getContraseña() {
+        return contraseña;
+    }
+
+    public void setContraseña(String contraseña) {
+        this.contraseña = contraseña;
+    }
+
     @Override
     public String toString() {
         return "Persona{" +
@@ -80,4 +88,5 @@ public abstract class Persona implements IPersona {
 
     public abstract boolean registrarse(Persona persona);
     public abstract void modificarDatos(String opcion);
+    public abstract String toCSVString();
 }

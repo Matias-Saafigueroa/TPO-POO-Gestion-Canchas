@@ -15,31 +15,59 @@ public class Main {
         do {
             System.out.print("Seleccione una opción: ");
                 System.out.println("========= MENÚ DE GESTIÓN DE CANCHAS =========");
-                System.out.println("1. ---Registrar Cliente-----");
+                System.out.println("1. ---Registrar Usuario/Iniciar Sesion-----");
                 System.out.println("2. ---Registrar Cancha------");
                 System.out.println("3. ---Registrar Reserva-----");
                 System.out.println("4. -----Listar Canchas------");
                 System.out.println("5. -----Listar Reservas-----");
-                System.out.println("6. -----Registrar Administrador-----");
                 System.out.println("7. -----Cancelar Reserva-----");
                 System.out.println("8. -----Realizar Pago-----");
-                System.out.println("6. ----------Salir----------");
+                System.out.println("2. ----------Salir----------");
                 System.out.println("=============================================");
             opcion = leerEntero();
 
 
             switch (opcion) {
                 case 1 -> {
-                    System.out.print("Ingrese nombre del cliente: ");
-                    String nombre = sc.nextLine();
-                    System.out.print("Ingrese DNI: ");
-                    String dni = sc.nextLine();
-                    System.out.print("Ingrese teléfono: ");
-                    String telefono = sc.nextLine();
-                    Cliente cliente = new Cliente(nombre, dni, telefono);
-                    GestorRegistro.registrarCliente(cliente);
-                    System.out.println("✅ Cliente registrado correctamente.");
+                    GestorRegistro gestorUsuarios = new GestorRegistro();
+                    System.out.println("Que desea realizar ('Iniciar Sesion'/'Registrarse')");
+                    String eleccion = sc.nextLine().toLowerCase();
+                    switch (eleccion) {
+                        case "registrarse" -> {
+                            System.out.print("Ingrese tipo de usuario (CLIENTE o ADMINSTRADOR)");
+                            String tipo = sc.nextLine().toLowerCase();
+                            System.out.print("Ingrese nombre  ");
+                            String nombre = sc.nextLine().toLowerCase();
+                            System.out.print("Ingrese DNI: ");
+                            String dni = sc.nextLine().toLowerCase();
+                            System.out.print("Ingrese teléfono: ");
+                            String telefono = sc.nextLine().toLowerCase();
+                            System.out.print("Ingrese correo: ");
+                            String correo = sc.nextLine().toLowerCase();
+                            if (tipo.equals("cliente")) {
+                                Cliente cliente = new Cliente(nombre, dni, telefono);
+                                cliente.registrarse(cliente);
+                                System.out.println("✅ Cliente registrado correctamente.");
+                            }
+                            if (tipo.equals("administrador")) {
+                                System.out.println("Ingrese el IdAdministrador");
+                                String idAdmin = sc.nextLine().toLowerCase();
 
+
+                            }
+                        }
+                        case "iniciar sesion"->{
+                            System.out.println("Ingrese el DNI");
+                            int dni = sc.nextInt();
+                            System.out.println("Ingrese la contraseña");
+                            String contraseña= sc.nextLine().toLowerCase();
+                            Persona usuario = gestorUsuarios.iniciarSesion(dni, contraseña);
+
+
+                    }
+
+
+                    }
                 }
                 case 2 -> {
                     System.out.println("Seleccione tipo de cancha:");

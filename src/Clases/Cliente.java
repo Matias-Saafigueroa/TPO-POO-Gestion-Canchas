@@ -7,27 +7,44 @@ import java.util.List;
 
 public class Cliente extends Persona implements ICliente {
     private int idCliente;
-    private List<Reserva> historialReservasCliente= new ArrayList<>();//
+    private List<Reserva> historialReservasCliente= new ArrayList<>();
+    //private static int proximoId = 1;
 
-    public Cliente(String nombre, String apellido, int dni, int telefono, String email, String contraseña, int idCliente, List<Reserva> historialReservasCliente) {
+    // Constructor para crear un cliente NUEVO (ej, desde la UI)
+    public Cliente(String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
         super(nombre, apellido, dni, telefono, email, contraseña);
-        this.idCliente = idCliente;
-        this.historialReservasCliente = historialReservasCliente;
+        //this.idCliente = proximoId++; // Asigna un ID
+        this.historialReservasCliente = new ArrayList<>(); // Inicializa la lista vacía
     }
 
-//constructor
+    // Constructor para CARGAR desde CSV
+    public Cliente(int idCliente, String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
+        super(nombre, apellido, dni, telefono, email, contraseña);
+        this.idCliente = idCliente;
+        this.historialReservasCliente = new ArrayList<>(); // Se inicializa vacía. Se llenará después.
+    }
+
+    //constructor
 
 
 
     //setters y getters
 
 
+    public int getIdCliente() {
+        return idCliente;
+    }
+
     @Override
-    public String toString() {
-        return "Cliente{" +
-                "idCliente=" + idCliente +
-                ", historialReservas=" + historialReservas +
-                '}';
+    public String toCSVString() {
+        // Formato: idCliente;nombre;apellido;dni;telefono;email;contraseña
+        return this.idCliente + ";" +
+                getNombre() + ";" +
+                getApellido() + ";" +
+                getDni() + ";" +
+                getTelefono() + ";" +
+                getEmail() + ";" +
+                getContraseña();
     }
 
 
