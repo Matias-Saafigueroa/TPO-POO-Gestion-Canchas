@@ -1,248 +1,224 @@
-package Clases; // O donde pongas tus clases
+package Clases;
+
+// (B.3) Importamos tus nuevas excepciones
+import Excepciones.ClienteYaExisteException;
+
+// (B.4) Importamos IOException para el manejo de archivos
+import java.io.IOException;
 
 import interfaces.IGestorRegistro;
 import interfaces.IGestionArchivos;
-import java.io.IOException;
 import java.util.ArrayList;
 
-
-
+/**
+ * (A.4) EXPERTO (GRASP): Esta clase es la experta en la lógica de negocio de usuarios.
+ * (C.2) SEPARACIÓN DE PERSISTENCIA: Delega el guardado a un gestorDeArchivos.
+ * (B.3) IMPLEMENTACIÓN: Implementa los métodos de la interfaz con Excepciones.
+ */
 public class GestorRegistro implements IGestorRegistro {
 
-    // --- ATRIBUTOS ---
     public static final int codigoValidacion = 2060;
     private ArrayList<Persona> listaClientes;
     private ArrayList<Persona> listaAdministradores;
+
+    // (A.4 / C.3) ABSTRACCIÓN: Depende de la interfaz (DIP)
     private IGestionArchivos gestorDeArchivos;
 
-    private static final String RUTA_CLIENTES = "clientes.csv";
+    private static final String RUTA_CLIENTES = "historialClientes.csv";
     private static final String RUTA_ADMINS = "administradores.csv";
 
     // --- CONSTRUCTOR ---
     public GestorRegistro() {
-        // Asumo que tu clase se llama 'GestionArchivos'
-        this.gestorDeArchivos = new GestionArchivos();
+        this.gestorDeArchivos = new GestionArchivosCSV();
         this.listaClientes = new ArrayList<>();
         this.listaAdministradores = new ArrayList<>();
 
-        cargarClientes();
-        cargarAdmins();
-    }
-
-    // --- MÉTODOS DE CLIENTE (Carga/Guardado) ---
-
-    private void cargarClientes() {
         try {
-            ArrayList<String> lineas = gestorDeArchivos.leerArchivo(RUTA_CLIENTES);
-            for (String linea : lineas) {
-                String[] datos = linea.split(";");
-                if (datos.length == 7) { // id;nombre;apellido;dni;tel;email;pass
-                    int id = Integer.parseInt(datos[0]);
-                    String nombre = datos[1];
-                    String apellido = datos[2];
-                    int dni = Integer.parseInt(datos[3]);
-                    int telefono = Integer.parseInt(datos[4]);
-                    String email = datos[5];
-                    String pass = datos[6];
-
-                    // Usamos el constructor de carga de Cliente
-                    Persona cliente = new Cliente(id, nombre, apellido, dni, telefono, email, pass);
-                    this.listaClientes.add(cliente);
-                }
-            }
+            // (B.4) Cargamos los datos al iniciar
+            cargarClientes();
+            cargarAdmins();
         } catch (IOException e) {
-            System.err.println("Error al cargar clientes.csv: " + e.getMessage());
+            System.err.println("ERROR CRÍTICO (IO): No se pudieron cargar los usuarios al iniciar: " + e.getMessage());
         } catch (NumberFormatException e) {
-            System.err.println("Error de formato en clientes.csv: " + e.getMessage());
+            System.err.println("ERROR CRÍTICO (Formato): Los archivos CSV están corruptos: " + e.getMessage());
         }
     }
 
-    private void guardarClientes() {
-        try {
-            ArrayList<String> lineas = new ArrayList<>();
-            for (Persona cliente : this.listaClientes) {
-                // Asumo que Cliente tiene el método toCSVString() que implementamos antes
-                lineas.add(((Cliente) cliente).toCSVString());
+    // --- MÉTODOS DE CARGA/GUARDADO (Refactorizados para lanzar errores) ---
+
+    private void cargarClientes() throws IOException, NumberFormatException {
+        ArrayList<String> lineas = gestorDeArchivos.leerArchivo(RUTA_CLIENTES);
+        for (String linea : lineas) {
+            String[] datos = linea.split(";");
+            if (datos.length == 7) {
+                int id = Integer.parseInt(datos[0]);
+                String nombre = datos[1];
+                String apellido = datos[2];
+                int dni = Integer.parseInt(datos[3]);
+                int telefono = Integer.parseInt(datos[4]);
+                String email = datos[5];
+                String pass = datos[6];
+                Persona cliente = new Cliente(id, nombre, apellido, dni, telefono, email, pass);
+                this.listaClientes.add(cliente);
             }
-            gestorDeArchivos.escribirArchivo(RUTA_CLIENTES, lineas);
-        } catch (IOException e) {
-            System.err.println("Error al guardar clientes.csv: " + e.getMessage());
         }
     }
-
-    // --- MÉTODOS DE ADMIN (Carga/Guardado) ---
-
-    private void cargarAdmins() {
-        try {
-            ArrayList<String> lineas = gestorDeArchivos.leerArchivo(RUTA_ADMINS);
-            for (String linea : lineas) {
-                String[] datos = linea.split(";");
-                if (datos.length == 7) { // id;nombre;apellido;dni;tel;email;pass
-                    int id = Integer.parseInt(datos[0]);
-                    String nombre = datos[1];
-                    String apellido = datos[2];
-                    int dni = Integer.parseInt(datos[3]);
-                    int telefono = Integer.parseInt(datos[4]);
-                    String email = datos[5];
-                    String pass = datos[6];
-
-                    // Usamos el constructor de carga de Admin
-                    Persona admin = new Administrador(id, nombre, apellido, dni, telefono, email, pass);
-                    this.listaAdministradores.add(admin);
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error al cargar administradores.csv: " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.err.println("Error de formato en administradores.csv: " + e.getMessage());
-        }
-    }
-
-    private void guardarAdmins() {
-        try {
-            ArrayList<String> lineas = new ArrayList<>();
-            for (Persona admin : this.listaAdministradores) {
-                // Asumo que Administrador tiene el método toCSVString()
-                lineas.add(((Administrador) admin).toCSVString());
-            }
-            gestorDeArchivos.escribirArchivo(RUTA_ADMINS, lineas);
-        } catch (IOException e) {
-            System.err.println("Error al guardar administradores.csv: " + e.getMessage());
-        }
-    }
-
-    // --- ⭐️ NUEVO MÉTODO DE INICIO DE SESIÓN ⭐️ ---
 
     /**
-     * Valida las credenciales de un usuario (Cliente o Admin) contra las listas en memoria.
-     *
-     * @param dni El DNI (int) del usuario que intenta ingresar.
-     * @param contraseña La contraseña (String) del usuario.
-     * @return El objeto Persona (Cliente o Administrador) si las credenciales son correctas.
-     * Retorna null si el DNI o la contraseña son incorrectos.
+     * (C.2) Este método ahora LANZA la excepción (throws)
+     * en lugar de atraparla (catch).
      */
-    public Persona iniciarSesion(int dni, String contraseña) {
-
-        // 1. Buscar primero en la lista de Administradores
-        for (Persona admin : this.listaAdministradores) {
-            // Asumo que Persona tiene getContraseña() como te indiqué
-            if (admin.getDni() == dni && admin.getContraseña().equals(contraseña)) {
-                return admin; // ¡Éxito! Devuelve el objeto Administrador
-            }
-        }
-
-        // 2. Si no es admin, buscar en la lista de Clientes
+    private void guardarClientes() throws IOException {
+        ArrayList<String> lineas = new ArrayList<>();
         for (Persona cliente : this.listaClientes) {
-            if (cliente.getDni() == dni && cliente.getContraseña().equals(contraseña)) {
-                return cliente; // ¡Éxito! Devuelve el objeto Cliente
+            lineas.add(((Cliente) cliente).toCSVString());
+        }
+        // (B.4) Ya no hay try-catch. Si escribirArchivo falla,
+        // este método fallará y le avisará al SistemaCanchas.
+        gestorDeArchivos.escribirArchivo(RUTA_CLIENTES, lineas);
+    }
+
+    private void cargarAdmins() throws IOException, NumberFormatException {
+        ArrayList<String> lineas = gestorDeArchivos.leerArchivo(RUTA_ADMINS);
+        for (String linea : lineas) {
+            String[] datos = linea.split(";");
+            if (datos.length == 7) {
+                int id = Integer.parseInt(datos[0]);
+                String nombre = datos[1];
+                String apellido = datos[2];
+                int dni = Integer.parseInt(datos[3]);
+                int telefono = Integer.parseInt(datos[4]);
+                String email = datos[5];
+                String pass = datos[6];
+                Persona admin = new Administrador(id, nombre, apellido, dni, telefono, email, pass);
+                this.listaAdministradores.add(admin);
             }
         }
-
-        // 3. Si no se encontró en ninguna lista, las credenciales son incorrectas
-        return null;
     }
 
-
-    // --- IMPLEMENTACIÓN DE MÉTODOS DE LA INTERFAZ IGestorRegistro ---
-
-    @Override
-    public boolean registarCliente(Persona persona) {
-        if (validarRegistro(persona)) {
-            this.listaClientes.add(persona);
-            guardarClientes();
-            return true; // Éxito
+    /**
+     * (C.2) Este método ahora LANZA la excepción (throws).
+     */
+    private void guardarAdmins() throws IOException {
+        ArrayList<String> lineas = new ArrayList<>();
+        for (Persona admin : this.listaAdministradores) {
+            lineas.add(((Administrador) admin).toCSVString());
         }
-        return false; // Falló (ya existe)
+        gestorDeArchivos.escribirArchivo(RUTA_ADMINS, lineas);
+    }
+
+    // --- MÉTODOS DE LA INTERFAZ (Implementados con la nueva lógica) ---
+
+    @Override
+    public void registarCliente(Persona persona) throws ClienteYaExisteException, IOException {
+        // (SOLUCIÓN 1) Validación separada: solo chequea clientes
+        if (listaClientes.stream().anyMatch(c -> c.getDni() == persona.getDni())) {
+            throw new ClienteYaExisteException("El DNI " + persona.getDni() + " ya está registrado como cliente.");
+        }
+        this.listaClientes.add(persona);
+        guardarClientes(); // (SOLUCIÓN 2) Esto ahora lanza IOException
     }
 
     @Override
-    public boolean eliminarCliente(Persona persona) {
-        boolean eliminado = this.listaClientes.removeIf(c -> c.getDni() == persona.getDni());
+    public void eliminarCliente(int dni) throws IOException {
+        boolean eliminado = this.listaClientes.removeIf(c -> c.getDni() == dni);
         if (eliminado) {
             guardarClientes();
         }
-        return eliminado;
+        // (Podrías lanzar una excepción si 'eliminado' es false)
     }
 
     @Override
-    public boolean modificarCliente(Persona personaModificada) {
+    public void modificarCliente(Persona personaModificada) throws IOException {
         for (int i = 0; i < listaClientes.size(); i++) {
-            // Buscamos por DNI, que es el identificador único
             if (listaClientes.get(i).getDni() == personaModificada.getDni()) {
-                listaClientes.set(i, personaModificada); // Reemplaza el objeto
+                listaClientes.set(i, personaModificada);
                 guardarClientes();
-                return true;
-            }
-        }
-        return false; // No se encontró
-    }
-
-    @Override
-    public void buscarCliente(int dni) {
-        // La interfaz pide 'void', así que solo imprimimos
-        for (Persona p : listaClientes) {
-            if (p.getDni() == dni) {
-                System.out.println("Cliente encontrado: " + p.toString());
                 return;
             }
         }
-        System.out.println("Cliente con DNI " + dni + " no encontrado.");
     }
 
-    // --- Métodos de Administrador ---
-
     @Override
-    public boolean registarAdministrador(Persona persona) {
-        if (validarRegistro(persona)) {
-            this.listaAdministradores.add(persona);
-            guardarAdmins();
-            return true;
+    public void registarAdministrador(Persona persona) throws ClienteYaExisteException, IOException {
+        // (SOLUCIÓN 1) Validación separada: solo chequea admins
+        if (listaAdministradores.stream().anyMatch(a -> a.getDni() == persona.getDni())) {
+            throw new ClienteYaExisteException("El DNI " + persona.getDni() + " ya está registrado como administrador.");
         }
-        return false;
+        this.listaAdministradores.add(persona);
+        guardarAdmins(); // (SOLUCIÓN 2) Esto ahora lanza IOException
     }
 
     @Override
-    public boolean eliminarAdministrador(Persona persona) {
-        boolean eliminado = this.listaAdministradores.removeIf(a -> a.getDni() == persona.getDni());
+    public void eliminarAdministrador(int dni) throws IOException {
+        boolean eliminado = this.listaAdministradores.removeIf(a -> a.getDni() == dni);
         if (eliminado) {
             guardarAdmins();
         }
-        return eliminado;
     }
 
     @Override
-    public boolean modificarAdministrador(Persona personaModificada) {
+    public void modificarAdministrador(Persona personaModificada) throws IOException {
         for (int i = 0; i < listaAdministradores.size(); i++) {
             if (listaAdministradores.get(i).getDni() == personaModificada.getDni()) {
                 listaAdministradores.set(i, personaModificada);
                 guardarAdmins();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void buscarAdministrador(int dni) {
-        for (Persona p : listaAdministradores) {
-            if (p.getDni() == dni) {
-                System.out.println("Admin encontrado: " + p.toString());
                 return;
             }
         }
-        System.out.println("Admin con DNI " + dni + " no encontrado.");
+    }
+
+    // --- MÉTODOS DE CONSULTA ---
+
+    @Override
+    public Persona iniciarSesion(int dni, String contraseña) {
+        // Esta lógica sigue funcionando bien
+        for (Persona admin : this.listaAdministradores) {
+            if (admin.getDni() == dni && admin.getContraseña().equals(contraseña)) {
+                return admin;
+            }
+        }
+        for (Persona cliente : this.listaClientes) {
+            if (cliente.getDni() == dni && cliente.getContraseña().equals(contraseña)) {
+                return cliente;
+            }
+        }
+        return null;
     }
 
     @Override
+    public Persona buscarCliente(int dni) {
+        return listaClientes.stream()
+                .filter(c -> c.getDni() == dni)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Este método ya no es necesario en la interfaz si la validación
+     * se hace dentro de los métodos de registro.
+     * Lo mantenemos por si la interfaz lo requiere.
+     */
+    @Override
     public boolean validarRegistro(Persona persona) {
-        // Valida que el DNI no exista en NINGUNA lista
         boolean existeEnClientes = listaClientes.stream()
                 .anyMatch(c -> c.getDni() == persona.getDni());
-
         boolean existeEnAdmins = listaAdministradores.stream()
                 .anyMatch(a -> a.getDni() == persona.getDni());
+        return !existeEnClientes && !existeEnAdmins; // Lógica global
+    }
 
-        // Es válido (true) si NO existe en ninguna lista
-        return !existeEnClientes && !existeEnAdmins;
+    /**
+     * (Requisito TPI) Asigna un ID único para un nuevo cliente.
+     */
+    public int asignarIdCliente() {
+        if (listaClientes.isEmpty()) {
+            return 1; // Si no hay clientes, empieza en 1
+        }
+        // Devuelve el ID más alto en la lista actual + 1
+        return listaClientes.stream()
+                .mapToInt(p -> ((Cliente) p).getIdCliente())
+                .max()
+                .orElse(0) + 1;
     }
 }

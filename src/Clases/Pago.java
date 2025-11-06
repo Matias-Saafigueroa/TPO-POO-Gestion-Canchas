@@ -2,21 +2,32 @@ package Clases;
 
 import java.time.LocalDate;
 
+/**
+ * (A.1) Requisito TPI: Clase Abstracta Base.
+ * Define la base para todas las formas de pago.
+ */
 public abstract class Pago {
+
     private int idPago;
-    private Reserva reserva;
+
+    // --- CORRECCIÓN ---
+    // (A.3) Composición: El Pago "pertenece a" una Reserva.
+    // Guardamos solo el ID para evitar dependencias circulares.
+    private int idReserva;
+
     private LocalDate fechaPago;
 
-
-    //constructor
-    public Pago(int idPago, Reserva reserva, LocalDate fechaPago) {
+    /**
+     * Constructor corregido para ser usado por las clases hijas.
+     * @param idReserva El ID de la reserva a la que pertenece este pago.
+     */
+    public Pago(int idPago, int idReserva, LocalDate fechaPago) {
         this.idPago = idPago;
-        this.reserva = reserva;
+        this.idReserva = idReserva; // Corregido
         this.fechaPago = fechaPago;
     }
 
-    //setters y getters
-
+    // --- Getters y Setters ---
 
     public int getIdPago() {
         return idPago;
@@ -26,12 +37,12 @@ public abstract class Pago {
         this.idPago = idPago;
     }
 
-    public Reserva getReserva() {
-        return reserva;
+    public int getIdReserva() {
+        return idReserva;
     }
 
-    public void setReserva(Reserva reserva) {
-        this.reserva = reserva;
+    public void setIdReserva(int idReserva) {
+        this.idReserva = idReserva;
     }
 
     public LocalDate getFechaPago() {
@@ -44,10 +55,18 @@ public abstract class Pago {
 
     @Override
     public String toString() {
+        // Corregido para no tener recursión infinita
         return "Pago{" +
                 "idPago=" + idPago +
-                ", reserva=" + reserva +
+                ", idReserva=" + idReserva + // Corregido
                 ", fechaPago=" + fechaPago +
                 '}';
     }
+
+    /**
+     * (A.1) Polimorfismo: (Opcional pero recomendado)
+     * Las hijas (Tarjeta/Efectivo) pueden implementar esto
+     * para devolver su formato CSV específico.
+     */
+    public abstract String toCSVString();
 }

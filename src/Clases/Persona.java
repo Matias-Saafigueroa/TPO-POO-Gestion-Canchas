@@ -85,8 +85,5 @@ public abstract class Persona implements IPersona {
     }
 
     //metodos
-
-    public abstract boolean registrarse(Persona persona);
-    public abstract void modificarDatos(String opcion);
     public abstract String toCSVString();
 }

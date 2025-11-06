@@ -1,43 +1,56 @@
 package Clases;
 
-import interfaces.ICliente;
+// (Ya no necesita 'java.util.List' ni 'ArrayList')
 
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * (A.1) Requisito TPI: Subclase de Persona.
+ * (A.4) SRP: Su única responsabilidad es modelar los datos de un Cliente.
+ */
+public class Cliente extends Persona {
 
-public class Cliente extends Persona implements ICliente {
+    // Atributo específico
     private int idCliente;
-    private List<Reserva> historialReservasCliente= new ArrayList<>();
-    //private static int proximoId = 1;
 
-    // Constructor para crear un cliente NUEVO (ej, desde la UI)
-    public Cliente(String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
-        super(nombre, apellido, dni, telefono, email, contraseña);
-        //this.idCliente = proximoId++; // Asigna un ID
-        this.historialReservasCliente = new ArrayList<>(); // Inicializa la lista vacía
-    }
+    // (Este atributo 'historialReservasCliente' FUE ELIMINADO
+    // para cumplir con SRP y la lógica de Gestores)
 
-    // Constructor para CARGAR desde CSV
+    /**
+     * Constructor para crear un cliente NUEVO (usado por GestorRegistro).
+     * El Gestor es responsable de generar el ID.
+     */
     public Cliente(int idCliente, String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
         super(nombre, apellido, dni, telefono, email, contraseña);
         this.idCliente = idCliente;
-        this.historialReservasCliente = new ArrayList<>(); // Se inicializa vacía. Se llenará después.
+        // (La lista de reservas ya no se inicializa aquí)
     }
 
-    //constructor
+    /* * NOTA: Este constructor de abajo es el que usa el 'GestorRegistro'
+     * para cargar desde el CSV. Si tu constructor de "nuevo cliente"
+     * (el de arriba) ya recibe el ID, este se vuelve redundante.
+     * * Puedes borrar este si usas el de arriba para todo:
+     * * // Constructor para CARGAR desde CSV (REDUNDANTE SI EL DE ARRIBA YA PIDE ID)
+     * public Cliente(int idCliente, String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
+     * super(nombre, apellido, dni, telefono, email, contraseña);
+     * this.idCliente = idCliente;
+     * }
+     */
 
 
-
-    //setters y getters
-
+    // --- Getters y Setters ---
 
     public int getIdCliente() {
         return idCliente;
     }
 
+    // --- MÉTODOS REQUERIDOS POR EL TPI ---
+
+    /**
+     * (A.1) Polimorfismo: Sobrescribe el método abstracto de Persona.
+     * (C.1) Persistencia: Genera el string para guardar en historialClientes.csv.
+     * Formato: idCliente;nombre;apellido;dni;telefono;email;contraseña
+     */
     @Override
     public String toCSVString() {
-        // Formato: idCliente;nombre;apellido;dni;telefono;email;contraseña
         return this.idCliente + ";" +
                 getNombre() + ";" +
                 getApellido() + ";" +
@@ -46,52 +59,4 @@ public class Cliente extends Persona implements ICliente {
                 getEmail() + ";" +
                 getContraseña();
     }
-
-
-    //metodos
-    @Override
-    public boolean registrarse(Persona persona) {
-        return false;//implementar
-    }
-
-    @Override
-    public void modificarDatos(String opcion) {
-    //implementar
-    }
-
-    @Override
-    public boolean realizarReserva(Reserva reserva) {
-        return false;//implementar
-    }
-
-    @Override
-    public void cancelarReserva(Reserva reserva) {
-    //implementar
-    }
-
-    @Override
-    public void realizarPago() {
-    //implementar
-    }
-
-    @Override
-    public void cancelarPago() {
-        //implementar
-
-    }
-
-    @Override
-    public List<Reserva> historialReservaCliente(int id) {
-        return List.of();
-    }
-
-    @Override
-    public List<Reserva> historialReserva(int id) {
-        return null;//implementar
-    }
-
-
-
-
-
 }

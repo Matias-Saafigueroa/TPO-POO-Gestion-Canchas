@@ -1,8 +1,6 @@
 package Clases;
 
-import interfaces.IAdministrador;
-
-public class Administrador extends Persona implements IAdministrador {
+public class Administrador extends Persona {
     private int IdAdministrador;
 
     public Administrador(int idAdministrador, String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
@@ -12,10 +10,6 @@ public class Administrador extends Persona implements IAdministrador {
 
     public int getIdAdministrador() {
         return IdAdministrador;
-    }
-
-    public void setIdAdministrador(int idAdministrador) {
-        IdAdministrador = idAdministrador;
     }
 
     @Override
@@ -29,29 +23,6 @@ public class Administrador extends Persona implements IAdministrador {
                 getEmail() + ";" +
                 getContraseña();
     }
-
-    @Override
-    public boolean registrarse(Persona persona) {
-        return false;
-    }
-
-    @Override
-    public void modificarDatos(String opcion) {
-
-    }
-
-    @Override
-    public void crearCancha(Cancha cancha) {
-
-    }
-
-    @Override
-    public void eliminarCancha(Cancha cancha) {
-
-    }
-
-    @Override
-    public void asignarPrecio(Cancha cancha) {
-
-    }
 }
+
+

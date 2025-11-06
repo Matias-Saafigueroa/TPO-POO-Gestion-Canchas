@@ -3,8 +3,8 @@ package Clases;
 public class CanchaTenis extends Cancha {
     private boolean esDoble;
 
-    public CanchaTenis(int idCancha, String superficie, TipoCancha tipoCancha, boolean esDoble) {
-        super(idCancha, superficie, tipoCancha.TENIS);
+    public CanchaTenis(int idCancha, TipoCancha tipoCancha, String superficie, String nombre, double precioPorHora, boolean esDoble) {
+        super(idCancha, tipoCancha, superficie, nombre, precioPorHora);
         this.esDoble = esDoble;
     }
 
@@ -22,5 +22,15 @@ public class CanchaTenis extends Cancha {
                 "ID=" + super.getIdCancha() +
                 "Es doble? " + esDoble +
                 '}';
+    }
+
+    @Override
+    public String toCSVString() {
+        return getIdCancha() + ";" +
+                getNombre() + ";" +
+                getSuperficie() + ";" +
+                getPrecioPorHora() + ";" +
+                getTipoCancha() + ";" + // (TENIS)
+                this.esDoble;
     }
 }

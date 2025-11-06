@@ -1,15 +1,22 @@
 package interfaces;
 
 import Clases.Persona;
+import Excepciones.ClienteYaExisteException; // Importar
+import java.io.IOException; // Importar
 
 public interface IGestorRegistro {
-    public boolean registarCliente(Persona persona);
-    public boolean eliminarCliente(Persona persona);
-    public boolean modificarCliente(Persona persona);
-    public void buscarCliente(int id);
-    public boolean registarAdministrador(Persona persona);
-    public boolean eliminarAdministrador(Persona persona);
-    public boolean modificarAdministrador(Persona persona);
-    public void buscarAdministrador(int id);
-    public boolean validarRegistro(Persona persona);
+
+    // (B.3) Métodos refactorizados: devuelven void, lanzan excepciones
+    void registarCliente(Persona persona) throws ClienteYaExisteException, IOException;
+    void eliminarCliente(int dni) throws IOException; // (Cambiado a DNI)
+    void modificarCliente(Persona persona) throws IOException;
+    int asignarIdCliente();
+    void registarAdministrador(Persona persona) throws ClienteYaExisteException, IOException;
+    void eliminarAdministrador(int dni) throws IOException; // (Cambiado a DNI)
+    void modificarAdministrador(Persona persona) throws IOException;
+
+    // Métodos de consulta (quedan igual)
+    Persona iniciarSesion(int dni, String contraseña);
+    Persona buscarCliente(int dni); // (Cambiado de void a Persona)
+    boolean validarRegistro(Persona persona);
 }

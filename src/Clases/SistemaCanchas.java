@@ -1,16 +1,24 @@
 package Clases;
 
+// Importamos todas las interfaces y excepciones
 import interfaces.*;
+import Excepciones.*;
+
+// Imports de Java necesarios
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Comparator; // (B.1) Requisito TPI: Para Ordenamiento
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
- * Clase controladora principal del sistema.
+ * (A.4) CONTROLADOR (GRASP): Clase principal del sistema.
  * Maneja todos los menús (Vistas) y coordina las llamadas a los Gestores (Modelo/Servicio).
- * Sigue los principios SOLID (SRP, DIP) y GRASP (Controller, Expert).
+ * (B.4) GESTIÓN DE ERRORES: Usa try-catch para gestionar excepciones de negocio.
  */
 public class SistemaCanchas {
 
@@ -24,11 +32,10 @@ public class SistemaCanchas {
     public SistemaCanchas() {
         this.sc = new Scanner(System.in);
 
-        // Inyección de Dependencias (Constructor)
-        // Creamos los gestores de los que depende GestorReserva
+        // (A.4 / C.3) Inyección de Dependencias (Constructor)
         this.gestorRegistro = new GestorRegistro();
         this.gestorCancha = new GestorCancha();
-        // GestorReserva "recibe" a los otros gestores para poder conectar IDs
+        // GestorReserva "recibe" a los otros gestores para poder "conectar" los IDs
         this.gestorReserva = new GestorReserva(gestorRegistro, gestorCancha);
     }
 
@@ -36,18 +43,19 @@ public class SistemaCanchas {
     public void iniciar() {
         int opcion;
         do {
+            // Menú principal simplificado
             System.out.println("\n========= MENÚ DE GESTIÓN DE CANCHAS =========");
-            System.out.println("1. Iniciar Sesión / Registrarse");
-            System.out.println("2. Listar Canchas Disponibles");
+            System.out.println("1. Iniciar Sesión");
+            System.out.println("2. Registrarse");
             System.out.println("3. Salir");
             System.out.println("=============================================");
             System.out.print("Seleccione una opción: ");
 
-            opcion = leerEntero();
+            opcion = leerEntero(); // (B.4) Llama al helper con try-catch
 
             switch (opcion) {
-                case 1 -> menuLoginRegistro();
-                case 2 -> listarCanchas();
+                    case 1 -> iniciarSesionUsuario();
+                    case 2 -> registrarNuevoUsuario();
                 case 3 -> System.out.println("✅ Saliendo del sistema...");
                 default -> System.out.println("❌ Opción inválida.");
             }
@@ -56,64 +64,63 @@ public class SistemaCanchas {
 
     // --- 4. MÉTODOS DE LÓGICA DE USUARIO ---
 
-    private void menuLoginRegistro() {
-        System.out.println("Que desea realizar ('Iniciar Sesion'/'Registrarse')");
-        String eleccion = sc.nextLine().toLowerCase();
-
-        switch (eleccion) {
-            case "registrarse" -> registrarNuevoUsuario();
-            case "iniciar sesion" -> iniciarSesionUsuario();
-            default -> System.out.println("❌ Opción no válida.");
-        }
-    }
-
     private void registrarNuevoUsuario() {
-        System.out.print("Ingrese tipo de usuario (CLIENTE o ADMINISTRADOR): ");
-        String tipo = sc.nextLine().toLowerCase();
+        // (B.4) REQUISITO: Manejo de excepciones con try-catch
+        try {
+            System.out.print("Ingrese tipo de usuario (CLIENTE o ADMINISTRADOR): ");
+            String tipo = sc.nextLine().toLowerCase();
 
-        System.out.print("Ingrese nombre: ");
-        String nombre = sc.nextLine();
-        System.out.print("Ingrese apellido: ");
-        String apellido = sc.nextLine();
-        System.out.print("Ingrese DNI: ");
-        int dni = leerEntero();
-        System.out.print("Ingrese teléfono: ");
-        int telefono = leerEntero();
-        System.out.print("Ingrese correo: ");
-        String email = sc.nextLine();
-        System.out.print("Ingrese contraseña: ");
-        String contrasena = sc.nextLine();
+            System.out.print("Ingrese nombre: ");
+            String nombre = sc.nextLine();
+            System.out.print("Ingrese apellido: ");
+            String apellido = sc.nextLine();
+            System.out.print("Ingrese DNI: ");
+            int dni = leerEntero();
+            System.out.print("Ingrese teléfono: ");
+            int telefono = leerEntero();
+            System.out.print("Ingrese correo: ");
+            String email = sc.nextLine();
+            System.out.print("Ingrese contraseña: ");
+            String contrasena = sc.nextLine();
 
-        if (tipo.equals("cliente")) {
-            // Usamos el constructor de Cliente para crear un nuevo usuario
-            Cliente cliente = new Cliente(nombre, apellido, dni, telefono, email, contrasena);
-            if (gestorRegistro.registarCliente(cliente)) {
+            if (tipo.equals("cliente")) {
+                // (Corrección): El Gestor asigna el ID, no el constructor.
+                // Usamos el constructor que SÍ definimos en la clase Cliente.
+                int idCliente = gestorRegistro.asignarIdCliente(); // Asumimos que este método existe
+                Cliente cliente = new Cliente(idCliente, nombre, apellido, dni, telefono, email, contrasena);
+
+                gestorRegistro.registarCliente(cliente);
                 System.out.println("✅ Cliente registrado correctamente.");
-            } else {
-                System.out.println("❌ Error: El DNI ya existe.");
-            }
-        } else if (tipo.equals("administrador")) {
-            System.out.print("Ingrese el código de validación de Admin: ");
-            int codigo = leerEntero();
 
-            if (codigo == GestorRegistro.codigoValidacion) {
-                System.out.print("Ingrese un ID de Administrador (ej: 901): ");
-                int idAdmin = leerEntero();
-                Administrador admin = new Administrador(idAdmin, nombre, apellido, dni, telefono, email, contrasena);
-                if (gestorRegistro.registarAdministrador(admin)) {
+            } else if (tipo.equals("administrador")) {
+                System.out.print("Ingrese el código de validación de Admin: ");
+                int codigo = leerEntero();
+
+                if (codigo == GestorRegistro.codigoValidacion) {
+                    System.out.print("Ingrese un ID de Administrador (ej: 901): ");
+                    int idAdmin = leerEntero();
+                    Administrador admin = new Administrador(idAdmin, nombre, apellido, dni, telefono, email, contrasena);
+
+                    gestorRegistro.registarAdministrador(admin);
                     System.out.println("✅ Administrador registrado correctamente.");
                 } else {
-                    System.out.println("❌ Error: El DNI o ID ya existe.");
+                    System.out.println("❌ Código de validación incorrecto.");
                 }
             } else {
-                System.out.println("❌ Código de validación incorrecto.");
+                System.out.println("❌ Tipo de usuario no reconocido.");
             }
-        } else {
-            System.out.println("❌ Tipo de usuario no reconocido.");
+
+        } catch (ClienteYaExisteException e) {
+            System.out.println("❌ ERROR DE REGISTRO: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: No se pudo guardar el usuario. " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ ERROR INESPERADO: " + e.getMessage());
         }
     }
 
     private void iniciarSesionUsuario() {
+        sc.nextLine();
         System.out.println("Ingrese el DNI:");
         int dni = leerEntero();
         System.out.println("Ingrese la contraseña:");
@@ -124,6 +131,7 @@ public class SistemaCanchas {
         if (usuario == null) {
             System.out.println("❌ ¡DNI o contraseña incorrectos!");
         } else {
+            // (A.1) POLIMORFISMO
             if (usuario instanceof Administrador) {
                 System.out.println("\nBienvenido, Administrador: " + usuario.getNombre());
                 menuAdministrador((Administrador) usuario);
@@ -166,8 +174,8 @@ public class SistemaCanchas {
                 case 5 -> listarReservas();
                 case 6 -> modificarClienteAdmin();
                 case 7 -> eliminarClienteAdmin();
-                case 8 -> modificarMisDatos(admin); // Le pasamos el admin logueado
-                case 9 -> eliminarAdministradorAdmin(admin); // Le pasamos el admin logueado
+                case 8 -> modificarMisDatos(admin);
+                case 9 -> eliminarAdministradorAdmin(admin);
                 case 10 -> System.out.println("... Volviendo al menú principal.");
                 default -> System.out.println("❌ Opción inválida.");
             }
@@ -189,20 +197,67 @@ public class SistemaCanchas {
             opcionCliente = leerEntero();
 
             switch (opcionCliente) {
-                case 1 -> registrarReserva(cliente); // Le pasamos el cliente logueado
+                case 1 -> registrarReserva(cliente);
                 case 2 -> verMisReservas(cliente);
                 case 3 -> cancelarReserva(cliente);
                 case 4 -> realizarPago(cliente);
-                case 5 -> modificarMisDatos(cliente); // Le pasamos el cliente logueado
+                case 5 -> modificarMisDatos(cliente);
                 case 6 -> System.out.println("... Volviendo al menú principal.");
                 default -> System.out.println("❌ Opción inválida.");
             }
         } while (opcionCliente != 6);
     }
 
-    // --- 6. MÉTODOS DE LÓGICA (IMPLEMENTADOS) ---
+    // --- 6. MÉTODOS DE LÓGICA (IMPLEMENTADOS CON TRY-CATCH) ---
 
     // --- Lógica de Admin ---
+
+    private void registrarNuevaCancha() {
+        System.out.println("\n--- Registro de Nueva Cancha ---");
+        try {
+            System.out.println("Seleccione tipo de cancha (FUTBOL, PADEL, TENIS):");
+            TipoCancha tipo = TipoCancha.valueOf(sc.nextLine().toUpperCase()); // (B.2) Uso de Enum
+
+            System.out.print("Ingrese el nombre de la cancha: ");
+            String nombreC = sc.nextLine();
+            System.out.print("Ingrese la superficie: ");
+            String superficie = sc.nextLine();
+            System.out.print("Ingrese el precio por hora: ");
+            double precio = leerDouble();
+
+            Cancha cancha = null;
+            int id = gestorCancha.asignarId(); // Obtenemos un ID único
+
+            // (A.1) Polimorfismo: Decidimos qué clase instanciar
+            switch (tipo) {
+                case FUTBOL:
+                    System.out.print("Ingrese la cantidad de jugadores: ");
+                    int cant = leerEntero();
+                    cancha = new CanchaFutbol(id,tipo, superficie, nombreC, precio , cant);
+                    break;
+                case PADEL:
+                    System.out.print("Ingrese el tipo de pared (Blindex, Cemento): ");
+                    String pared = sc.nextLine();
+                    cancha = new CanchaPadel(id,tipo, superficie, nombreC, precio , pared);
+                    break;
+                case TENIS:
+                    System.out.print("¿La cancha es para dobles? (true/false): ");
+                    boolean esDoble = Boolean.parseBoolean(sc.nextLine());
+                    cancha = new CanchaTenis(id,tipo, superficie, nombreC, precio , esDoble);
+                    break;
+            }
+
+            gestorCancha.agregarCancha(cancha);
+            System.out.println("✅ Cancha '" + nombreC + "' creada con éxito.");
+
+        } catch (CanchaException e) {
+            System.out.println("❌ ERROR DE CANCHA: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ ERROR: Tipo de cancha no válido. Use FUTBOL, PADEL o TENIS.");
+        }
+    }
 
     private void eliminarCancha() {
         System.out.println("\n--- Eliminar Cancha ---");
@@ -210,10 +265,13 @@ public class SistemaCanchas {
         System.out.print("Ingrese el ID de la cancha a eliminar: ");
         int idCancha = leerEntero();
 
-        if (gestorCancha.eliminarCancha(idCancha)) {
+        try {
+            gestorCancha.eliminarCancha(idCancha);
             System.out.println("✅ Cancha eliminada correctamente.");
-        } else {
-            System.out.println("❌ Error: No se encontró la cancha con ese ID.");
+        } catch (CanchaException e) {
+            System.out.println("❌ ERROR: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
@@ -225,10 +283,13 @@ public class SistemaCanchas {
         System.out.print("Ingrese el nuevo precio por hora: ");
         double precio = leerDouble();
 
-        if (gestorCancha.asignarPrecio(idCancha, precio)) {
+        try {
+            gestorCancha.asignarPrecio(idCancha, precio);
             System.out.println("✅ Precio actualizado.");
-        } else {
-            System.out.println("❌ Error: No se encontró la cancha.");
+        } catch (CanchaException e) {
+            System.out.println("❌ ERROR: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
@@ -252,7 +313,7 @@ public class SistemaCanchas {
 
         Persona cliente = gestorRegistro.buscarCliente(dni);
         if (cliente != null && cliente instanceof Cliente) {
-            modificarMisDatos(cliente); // Reutilizamos el método de modificar datos
+            modificarMisDatos(cliente); // Reutilizamos el método
         } else {
             System.out.println("❌ No se encontró un cliente con ese DNI.");
         }
@@ -263,10 +324,11 @@ public class SistemaCanchas {
         System.out.print("Ingrese DNI del cliente a eliminar: ");
         int dni = leerEntero();
 
-        if (gestorRegistro.eliminarCliente(dni)) {
+        try {
+            gestorRegistro.eliminarCliente(dni);
             System.out.println("✅ Cliente eliminado.");
-        } else {
-            System.out.println("❌ No se encontró cliente.");
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
@@ -277,10 +339,14 @@ public class SistemaCanchas {
 
         if (dni == adminLogueado.getDni()) {
             System.out.println("❌ No puedes eliminarte a ti mismo.");
-        } else if (gestorRegistro.eliminarAdministrador(dni)) {
+            return;
+        }
+
+        try {
+            gestorRegistro.eliminarAdministrador(dni);
             System.out.println("✅ Administrador eliminado.");
-        } else {
-            System.out.println("❌ No se encontró admin.");
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
@@ -288,44 +354,53 @@ public class SistemaCanchas {
 
     private void registrarReserva(Cliente cliente) {
         System.out.println("\n--- Nueva Reserva ---");
-        if (gestorCancha.obtenerCanchas().isEmpty()) {
-            System.out.println("⚠️ No hay canchas registradas para reservar.");
-            return;
-        }
+        try {
+            if (gestorCancha.obtenerCanchas().isEmpty()) {
+                System.out.println("⚠️ No hay canchas registradas para reservar.");
+                return;
+            }
 
-        listarCanchas();
-        System.out.print("Seleccione cancha (ingrese ID): ");
-        int idCancha = leerEntero();
-        Cancha cancha = gestorCancha.buscarCancha(idCancha);
+            listarCanchas();
+            System.out.print("Seleccione cancha (ingrese ID): ");
+            int idCancha = leerEntero();
+            Cancha cancha = gestorCancha.buscarCancha(idCancha);
 
-        if(cancha == null) {
-            System.out.println("❌ ID de cancha no válido.");
-            return;
-        }
+            if(cancha == null) {
+                System.out.println("❌ ID de cancha no válido.");
+                return;
+            }
 
-        System.out.print("Ingrese fecha de la reserva (ej: 2025-11-28): ");
-        LocalDate fecha = LocalDate.parse(sc.nextLine()); // (Asegúrate de que la clase Reserva importe java.time.LocalDate)
+            System.out.print("Ingrese fecha de la reserva (ej: 2025-11-28): ");
+            LocalDate fecha = LocalDate.parse(sc.nextLine());
 
-        System.out.print("Ingrese hora de inicio (ej: 18:00): ");
-        LocalTime horaInicio = LocalTime.parse(sc.nextLine()); // (Asegúrate de que la clase Reserva importe java.time.LocalTime)
+            System.out.print("Ingrese hora de inicio (ej: 18:00): ");
+            LocalTime horaInicio = LocalTime.parse(sc.nextLine());
 
-        // Validamos con el Experto (GestorReserva)
-        if (gestorReserva.validarReserva(idCancha, fecha, horaInicio)) {
+            System.out.print("Ingrese hora de fin (ej: 19:00): ");
+            LocalTime horaFin = LocalTime.parse(sc.nextLine());
 
-            // Creamos la reserva (asumo un constructor que NO pide pago)
-            Reserva reserva = new Reserva(cliente.getIdCliente(), idCancha, fecha, horaInicio);
+            if (gestorReserva.validarDisponibilidad(idCancha, fecha, horaInicio)) {
 
-            // ¡IMPORTANTE! El constructor de Reserva debe poner
-            // automáticamente el estado en PENDIENTE_DE_PAGO.
+                // --- CORRECCIÓN LÓGICA ---
+                // El Gestor debe asignar el ID de la reserva, no la UI.
+                int idReserva = gestorReserva.asignarIdReserva();
 
-            if(gestorReserva.registrarReserva(reserva)) { // El gestor la guarda en el CSV
+                // Usamos el constructor de Reserva que definimos
+                Reserva reserva = new Reserva(idReserva, cliente, cancha, fecha, horaInicio, horaFin, cancha.getPrecioPorHora(), null);
+
+                gestorReserva.registrarReserva(reserva);
+
                 System.out.println("✅ Reserva registrada con estado 'PENDIENTE DE PAGO'.");
                 System.out.println("Por favor, abone desde el menú de cliente para confirmarla.");
             } else {
-                System.out.println("❌ Error al guardar la reserva.");
+                System.out.println("❌ La cancha no está disponible en esa fecha/hora.");
             }
-        } else {
-            System.out.println("❌ La cancha no está disponible en esa fecha/hora.");
+        } catch (DateTimeParseException e) {
+            System.out.println("❌ ERROR: Formato de fecha u hora incorrecto. Use AAAA-MM-DD y HH:MM.");
+        } catch (ReservaException e) {
+            System.out.println("❌ ERROR DE RESERVA: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
@@ -338,148 +413,154 @@ public class SistemaCanchas {
             System.out.println("No tienes reservas en tu historial.");
         } else {
             for (Reserva r : misReservas) {
-                // (Asumo que el toString() de Reserva es informativo)
-                System.out.println("- " + r.toString());
+                // --- CORRECCIÓN LÓGICA ---
+                // Obtenemos la cancha directamente del objeto Reserva
+                Cancha c = r.getCancha();
+                String nombreCancha = (c != null) ? c.getNombre() : "Cancha Eliminada";
+
+                System.out.printf("- ID: %d | Cancha: %s | Fecha: %s | Hora: %s | Estado: %s | Total: $%.2f\n",
+                        r.getIdReserva(),
+                        nombreCancha,
+                        r.getFecha(),
+                        r.getHoraInicio(),
+                        r.getEstado(),
+                        r.getMontoTotal()
+                );
             }
         }
     }
 
     private void cancelarReserva(Cliente cliente) {
         System.out.println("\n--- Cancelar Reserva ---");
+        try {
+            List<Reserva> misReservasActivas = gestorReserva.historialReservaCliente(cliente.getIdCliente()).stream()
+                    // --- CORRECCIÓN TIPEO ---
+                    .filter(r -> r.getEstado() == EstadoReserva.PENDIENTE || r.getEstado() == EstadoReserva.CONFIRMADA)
+                    .collect(Collectors.toList());
 
-        // 1. Obtener y mostrar solo las reservas PENDIENTES o CONFIRMADAS del cliente
-        List<Reserva> misReservasActivas = gestorReserva.historialReservaCliente(cliente.getIdCliente()).stream()
-                .filter(r -> r.getEstado() == EstadoReserva.PENDIENTE || r.getEstado() == EstadoReserva.CONFIRMADA)
-                .collect(Collectors.toList());
+            if (misReservasActivas.isEmpty()) {
+                System.out.println("No tienes reservas activas para cancelar.");
+                return;
+            }
 
-        if (misReservasActivas.isEmpty()) {
-            System.out.println("No tienes reservas activas para cancelar.");
-            return;
-        }
+            for (int i = 0; i < misReservasActivas.size(); i++) {
+                System.out.println("  " + (i + 1) + ". " + misReservasActivas.get(i).toString());
+            }
 
-        for (int i = 0; i < misReservasActivas.size(); i++) {
-            System.out.println("  " + (i + 1) + ". " + misReservasActivas.get(i).toString());
-        }
+            System.out.print("Seleccione la reserva a CANCELAR (ej: 1) o 0 para salir: ");
+            int opcion = leerEntero();
 
-        // 2. Pedir al usuario que elija una
-        System.out.print("Seleccione la reserva a CANCELAR (ej: 1) o 0 para salir: ");
-        int opcion = leerEntero();
+            if (opcion == 0 || opcion > misReservasActivas.size()) {
+                System.out.println("Operación cancelada.");
+                return;
+            }
+            Reserva reservaACancelar = misReservasActivas.get(opcion - 1);
 
-        if (opcion == 0 || opcion > misReservasActivas.size()) {
-            System.out.println("Operación cancelada.");
-            return;
-        }
-
-        Reserva reservaACancelar = misReservasActivas.get(opcion - 1);
-
-        // 3. Llamar al experto
-        if (gestorReserva.cancelarReserva(reservaACancelar.getIdReserva())) {
+            gestorReserva.cancelarReserva(reservaACancelar.getIdReserva());
             System.out.println("✅ Reserva cancelada correctamente.");
-        } else {
-            System.out.println("❌ Error al cancelar la reserva.");
+
+        } catch (ReservaException e) {
+            System.out.println("❌ ERROR: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
     private void realizarPago(Cliente cliente) {
         System.out.println("\n--- Abonar Reserva ---");
+        try {
+            List<Reserva> misPendientes = gestorReserva.historialReservaCliente(cliente.getIdCliente()).stream()
+                    .filter(r -> r.getEstado() == EstadoReserva.PENDIENTE)
+                    .collect(Collectors.toList());
 
-        // 1. Filtrar solo las mías Y que estén pendientes
-        List<Reserva> misPendientes = gestorReserva.historialReservaCliente(cliente.getIdCliente()).stream()
-                .filter(r -> r.getEstado() == EstadoReserva.PENDIENTE)
-                .collect(Collectors.toList());
-
-        if (misPendientes.isEmpty()) {
-            System.out.println("No tienes reservas pendientes de pago.");
-            return;
-        }
-
-        // 2. Mostrar al usuario las reservas que puede pagar
-        System.out.println("Reservas pendientes de pago:");
-        for (int i = 0; i < misPendientes.size(); i++) {
-            Reserva r = misPendientes.get(i);
-            System.out.printf("  %d. Cancha: %s | Fecha: %s | Monto: $%.2f\n",
-                    (i + 1),
-                    gestorCancha.buscarCancha(r.getIdCancha()).getNombre(), // Buscamos el nombre
-                    r.getFecha(),
-                    r.getMontoTotal());
-        }
-
-        // 3. Pedir al usuario que elija una
-        System.out.print("Seleccione la reserva que desea abonar (ej: 1) o 0 para cancelar: ");
-        int opcion = leerEntero();
-
-        if (opcion == 0 || opcion > misPendientes.size()) {
-            System.out.println("Operación cancelada.");
-            return;
-        }
-
-        Reserva reservaAPagar = misPendientes.get(opcion - 1);
-
-        // 4. Proceso de pago
-        System.out.println("Método de pago ('EFECTIVO' o 'TARJETA'):");
-        String metodo = sc.nextLine().toLowerCase();
-
-        boolean pagoExitoso = false;
-
-        if (metodo.equals("tarjeta")) {
-            System.out.print("Ingrese Nro. de Tarjeta (ej: 16 dígitos): ");
-            String numeroTarjeta = sc.nextLine();
-            System.out.print("Ingrese entidad bancaria (ej: VISA): ");
-            String entidad = sc.nextLine();
-            System.out.print("Ingrese cantidad de cuotas (1, 3, 6): ");
-            int cuotas = leerEntero();
-
-            if (numeroTarjeta.length() >= 10) {
-                System.out.println("Procesando pago con tarjeta...");
-                pagoExitoso = gestorReserva.confirmarPagoTarjeta(
-                        reservaAPagar, numeroTarjeta, cuotas, entidad);
-            } else {
-                System.out.println("❌ Número de tarjeta inválido. Pago cancelado.");
+            if (misPendientes.isEmpty()) {
+                System.out.println("No tienes reservas pendientes de pago.");
+                return;
             }
 
-        } else if (metodo.equals("efectivo")) {
-            System.out.println("Pago en efectivo seleccionado. (Debe abonar en caja)");
-            pagoExitoso = gestorReserva.confirmarPagoEfectivo(reservaAPagar, true);
-        } else {
-            System.out.println("❌ Método de pago no reconocido. Operación cancelada.");
-        }
+            System.out.println("Reservas pendientes de pago:");
+            for (int i = 0; i < misPendientes.size(); i++) {
+                Reserva r = misPendientes.get(i);
 
-        // 5. Confirmar al usuario
-        if (pagoExitoso) {
-            System.out.println("✅ ¡Pago aceptado! Su reserva ha sido confirmada.");
-        } else {
-            System.out.println("❌ Hubo un error al procesar el pago o confirmar la reserva.");
+                // --- CORRECCIÓN LÓGICA ---
+                Cancha c = r.getCancha();
+                String nombreCancha = (c != null) ? c.getNombre() : "Cancha Eliminada";
+
+                System.out.printf("  %d. Cancha: %s | Fecha: %s | Monto: $%.2f\n",
+                        (i + 1), nombreCancha, r.getFecha(), r.getMontoTotal());
+            }
+
+            System.out.print("Seleccione la reserva que desea abonar (ej: 1) o 0 para cancelar: ");
+            int opcion = leerEntero();
+            if (opcion == 0 || opcion > misPendientes.size()) {
+                System.out.println("Operación cancelada.");
+                return;
+            }
+            Reserva reservaAPagar = misPendientes.get(opcion - 1);
+
+            System.out.println("Método de pago ('EFECTIVO' o 'TARJETA'):");
+            String metodo = sc.nextLine().toLowerCase();
+
+            boolean pagoExitoso = false;
+
+            if (metodo.equals("tarjeta")) {
+                System.out.print("Ingrese Nro. de Tarjeta (ej: 16 dígitos): ");
+                String numeroTarjeta = sc.nextLine();
+                System.out.print("Ingrese entidad bancaria (ej: VISA): ");
+                String entidad = sc.nextLine();
+                System.out.print("Ingrese cantidad de cuotas (1, 3, 6): ");
+                int cuotas = leerEntero();
+
+                if (numeroTarjeta.length() < 10) {
+                    System.out.println("❌ Número de tarjeta inválido. Pago cancelado.");
+                    return;
+                }
+
+                gestorReserva.confirmarPagoTarjeta(reservaAPagar, numeroTarjeta, cuotas, entidad);
+                pagoExitoso = true;
+
+            } else if (metodo.equals("efectivo")) {
+                gestorReserva.confirmarPagoEfectivo(reservaAPagar, true);
+                pagoExitoso = true;
+            } else {
+                System.out.println("❌ Método de pago no reconocido. Operación cancelada.");
+                return;
+            }
+
+            if (pagoExitoso) {
+                System.out.println("✅ ¡Pago aceptado! Su reserva ha sido confirmada.");
+            }
+
+        } catch (ReservaException e) {
+            System.out.println("❌ ERROR DE PAGO: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
     // --- Lógica Común ---
 
-    /**
-     * Método genérico para que un Admin o un Cliente modifiquen sus propios datos.
-     * @param persona El objeto Persona (Cliente o Admin) que inició sesión.
-     */
     private void modificarMisDatos(Persona persona) {
         System.out.println("\n--- Modificar Mis Datos ---");
-        System.out.print("Ingrese nuevo teléfono (actual: " + persona.getTelefono() + "): ");
-        int nuevoTel = leerEntero();
-        System.out.print("Ingrese nuevo email (actual: " + persona.getEmail() + "): ");
-        String nuevoEmail = sc.nextLine();
+        try {
+            System.out.print("Ingrese nuevo teléfono (actual: " + persona.getTelefono() + "): ");
+            int nuevoTel = leerEntero();
+            System.out.print("Ingrese nuevo email (actual: " + persona.getEmail() + "): ");
+            String nuevoEmail = sc.nextLine();
 
-        persona.setTelefono(nuevoTel);
-        persona.setEmail(nuevoEmail);
+            persona.setTelefono(nuevoTel);
+            persona.setEmail(nuevoEmail);
 
-        // El gestor sabe si es Cliente o Admin y llama al método correcto
-        if(persona instanceof Cliente) {
-            gestorRegistro.modificarCliente(persona);
-        } else if (persona instanceof Administrador) {
-            gestorRegistro.modificarAdministrador(persona);
+            if(persona instanceof Cliente) {
+                gestorRegistro.modificarCliente(persona);
+            } else if (persona instanceof Administrador) {
+                gestorRegistro.modificarAdministrador(persona);
+            }
+
+            System.out.println("✅ Datos actualizados.");
+        } catch (IOException e) {
+            System.out.println("❌ ERROR DE ARCHIVO: No se pudieron guardar los datos.");
         }
-
-        System.out.println("✅ Datos actualizados.");
-    }
-
-    private void registrarNuevaCancha() {
-        // ... (Este método queda igual que en la versión anterior) ...
     }
 
     private void listarCanchas() {
@@ -487,9 +568,12 @@ public class SistemaCanchas {
         if (canchas.isEmpty()) {
             System.out.println("No hay canchas registradas.");
         } else {
-            System.out.println("\n🏟️ Canchas registradas:");
+            // (B.1) REQUISITO TPI: ORDENAMIENTO
+            canchas.sort(Comparator.comparing(Cancha::getNombre));
+
+            System.out.println("\n🏟️ Canchas registradas (Ordenadas por nombre):");
             for (Cancha c : canchas) {
-                System.out.println("- " + c.toString()); // Usamos el toString() de Cancha
+                System.out.println("- " + c.toString());
             }
         }
     }
@@ -499,7 +583,7 @@ public class SistemaCanchas {
         if (reservas.isEmpty()) {
             System.out.println("No hay reservas registradas.");
         } else {
-            System.out.println("\n📅 Todas las Reservas:");
+            System.out.println("\n📅 Todas las Reservas del Sistema:");
             for (Reserva r : reservas) {
                 System.out.println("- " + r.toString());
             }

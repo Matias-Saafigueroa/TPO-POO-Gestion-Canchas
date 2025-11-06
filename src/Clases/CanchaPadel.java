@@ -1,20 +1,16 @@
 package Clases;
 
 public class CanchaPadel extends Cancha{
-    private boolean tipoPared;
+    private String tipoPared;
 
 
-    public CanchaPadel(int idCancha, TipoCancha tipoCancha, String superficie, String nombre, boolean tipoPared) {
-        super(idCancha, tipoCancha, superficie, nombre);
+    public CanchaPadel(int idCancha, TipoCancha tipoCancha, String superficie, String nombre, double precioPorHora, String tipoPared) {
+        super(idCancha, tipoCancha, superficie, nombre, precioPorHora);
         this.tipoPared = tipoPared;
     }
 
-    public boolean isTipoPared() {
+    public String getTipoPared() {
         return tipoPared;
-    }
-
-    public void setTipoPared(boolean tipoPared) {
-        this.tipoPared = tipoPared;
     }
 
     @Override
@@ -22,5 +18,15 @@ public class CanchaPadel extends Cancha{
         return "CanchaPadel{" +
                 "tipoPared=" + tipoPared +
                 '}';
+    }
+
+    @Override
+    public String toCSVString() {
+        return getIdCancha() + ";" +
+                getNombre() + ";" +
+                getSuperficie() + ";" +
+                getPrecioPorHora() + ";" +
+                getTipoCancha() + ";" + // (PADEL)
+                this.tipoPared;
     }
 }
