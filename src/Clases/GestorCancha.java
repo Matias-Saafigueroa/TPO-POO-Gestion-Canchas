@@ -6,7 +6,7 @@ import Excepciones.CanchaException; // (B.3) Importar excepción
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional; // Aunque no lo usamos en la versión final, es bueno importarlo si se usa 'findFirst()'
+
 
 public class GestorCancha implements IGestorCancha {
 
@@ -18,7 +18,6 @@ public class GestorCancha implements IGestorCancha {
         this.gestorDeArchivos = new GestionArchivosCSV();
         this.listaCanchas = new ArrayList<>();
         try {
-            // (B.4) Cargamos los datos al iniciar
             cargarCanchas();
         } catch (IOException e) {
             System.err.println("ERROR CRÍTICO (IO): No se pudieron cargar las canchas: " + e.getMessage());
@@ -29,16 +28,16 @@ public class GestorCancha implements IGestorCancha {
         }
     }
 
-    // --- MÉTODOS DE LA INTERFAZ (IMPLEMENTADOS) ---
+
 
     @Override
     public void agregarCancha(Cancha cancha) throws CanchaException, IOException {
         if (!validarDatos(cancha.getNombre())) {
-            // (B.3) Lanzamos la excepción de negocio
+
             throw new CanchaException("El nombre '" + cancha.getNombre() + "' ya está en uso.");
         }
         this.listaCanchas.add(cancha);
-        guardarCanchas(); // Guardamos el estado actualizado
+        guardarCanchas();
     }
 
     @Override
@@ -46,10 +45,10 @@ public class GestorCancha implements IGestorCancha {
         boolean eliminado = this.listaCanchas.removeIf(c -> c.getIdCancha() == idCancha);
 
         if (!eliminado) {
-            // (B.3) Lanzamos la excepción si no se pudo eliminar
+
             throw new CanchaException("No se encontró la cancha con ID: " + idCancha);
         }
-        guardarCanchas(); // Guardamos el estado actualizado
+        guardarCanchas();
     }
 
     @Override
@@ -57,7 +56,7 @@ public class GestorCancha implements IGestorCancha {
         Cancha cancha = buscarCancha(idCancha);
 
         if (cancha != null) {
-            // Implementación 100%: Asumimos que la clase Cancha tiene este método
+
             cancha.setPrecioPorHora(precio);
             guardarCanchas(); // Guardamos el estado actualizado
         } else {

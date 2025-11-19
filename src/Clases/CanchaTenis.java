@@ -1,7 +1,10 @@
 package Clases;
 
+/**
+ * [TPI A.1] Subclase concreta 3.
+ */
 public class CanchaTenis extends Cancha {
-    private boolean esDoble;
+    private boolean esDoble; // Atributo específico
 
     public CanchaTenis(int idCancha, TipoCancha tipoCancha, String superficie, String nombre, double precioPorHora, boolean esDoble) {
         super(idCancha, tipoCancha, superficie, nombre, precioPorHora);
@@ -24,13 +27,16 @@ public class CanchaTenis extends Cancha {
                 '}';
     }
 
+    /**
+     * [TPI A.1] Polimorfismo: Guarda los datos comunes + esDoble.
+     */
     @Override
     public String toCSVString() {
         return getIdCancha() + ";" +
                 getNombre() + ";" +
                 getSuperficie() + ";" +
                 getPrecioPorHora() + ";" +
-                getTipoCancha() + ";" + // (TENIS)
+                getTipoCancha() + ";" +
                 this.esDoble;
     }
 }

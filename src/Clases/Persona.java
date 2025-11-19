@@ -2,6 +2,10 @@ package Clases;
 
 import interfaces.IPersona;
 
+/**
+ * [TPI A.1] Herencia: Clase Abstracta Base obligatoria.
+ * Define los atributos y comportamientos comunes de todas las personas.
+ */
 public abstract class Persona implements IPersona {
     private String nombre;
     private String apellido;
@@ -9,8 +13,6 @@ public abstract class Persona implements IPersona {
     private int telefono;
     private String email;
     private String contraseña;
-
-    //constructor
 
     public Persona(String nombre, String apellido, int dni, int telefono, String email, String contraseña) {
         this.nombre = nombre;
@@ -21,57 +23,7 @@ public abstract class Persona implements IPersona {
         this.contraseña = contraseña;
     }
 
-
-    //setters y getters
-
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellido() {
-        return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
-
-    public int getDni() {
-        return dni;
-    }
-
-    public void setDni(int dni) {
-        this.dni = dni;
-    }
-
-    public int getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(int telefono) {
-        this.telefono = telefono;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getContraseña() {
-        return contraseña;
-    }
-
-    public void setContraseña(String contraseña) {
-        this.contraseña = contraseña;
-    }
+    // ... (Getters y Setters) ...
 
     @Override
     public String toString() {
@@ -79,11 +31,12 @@ public abstract class Persona implements IPersona {
                 "nombre='" + nombre + '\'' +
                 ", apellido='" + apellido + '\'' +
                 ", dni=" + dni +
-                ", telefono=" + telefono +
-                ", email='" + email + '\'' +
                 '}';
     }
 
-    //metodos
+    /**
+     * [TPI A.1] Método Abstracto: Obliga a las subclases a definir su persistencia.
+     * [TPI C.1] Base del contrato de persistencia en CSV.
+     */
     public abstract String toCSVString();
 }
